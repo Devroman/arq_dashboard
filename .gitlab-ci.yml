@@ -9,13 +9,6 @@ stages:
    - docker
    - rnd
 
-.check-branch-behind-master: &check-branch-behind-master
-- >
-  if [ $(git log HEAD..origin/master --pretty=oneline | wc -l) -gt 0 ];
-  then echo "Ветка отстала от мастера!";
-  exit 1;
-  fi
-
 .docker_login_tpl: &docker_login
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -26,7 +19,6 @@ stages:
   cache: {}
   extends: .rnd_tags
   script:
-    - *check-branch-behind-master
     - >
       docker build --cache-from $CI_REGISTRY_IMAGE/arq_dashboard:cache-latest
       -t $CI_REGISTRY_IMAGE/arq_dashboard:$CI_COMMIT_REF_SLUG
