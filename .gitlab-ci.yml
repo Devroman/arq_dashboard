@@ -22,7 +22,7 @@ stages:
     - >
       docker build --cache-from $CI_REGISTRY_IMAGE/arq_dashboard:cache-latest
       -t $CI_REGISTRY_IMAGE/arq_dashboard:$CI_COMMIT_REF_SLUG
-      -f $BUILD_IMAGE.Dockerfile .
+      -f dashboard.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/arq_dashboard:$CI_COMMIT_REF_SLUG
 
 build_image:
