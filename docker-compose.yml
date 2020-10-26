@@ -1,0 +1,17 @@
+version: '3.3'
+
+services:
+  dashboard:
+    build:
+      context: .
+    command:
+      uvicorn arq_dashboard:app --host 0.0.0.0 --port 9182 --reload
+    environment:
+      - REDIS_HOST=staging-tm-1.ati.dom
+      - REDIS_DB=1
+    volumes:
+      - ./arq_dashboard:/arq_dashboard:cached
+    ports:
+      - 9182:9182
+    stdin_open: true
+    tty: true

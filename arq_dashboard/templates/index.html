@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="5">
+    <title>ARQ Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <style>
+        .status {
+            font-weight: bold;
+        }
+        .status.running {
+            color: #88ac0f;
+        }
+        .status.pending {
+            color: #f19507;
+        }
+    </style>
+</head>
+<body>
+    <br />
+    <div class="container">
+        <div class="row">
+            <h1>ARQ Dashboard</h1>
+            <button class="button button-clear" onclick="window.location.reload();">Reload</button>
+        </div>
+        <div class="row">
+            <h2>Queued</h2>
+        </div>
+        <div class="row">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Function</th>
+                        <th>Enqueue time</th>
+                        <th>Args</th>
+                        <th>Kwargs</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job_id, job in jobs.items() %}
+                    <tr>
+                        <td class="status {% if job_id in active_jobs %}running{% else %}pending{% endif %}">
+                            {% if job_id in active_jobs %}
+                            RUNNING
+                            {% else %}
+                            PENDING
+                            {% endif %}
+                        </td>
+                        <td>{{ job.f }}</td>
+                        <td>{{ job.et }}</td>
+                        <td>
+                            <ul>
+                            {% for arg in job.a %}
+                                <li>{{ arg }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                            {% for kwarg, value in job.k.items() %}
+                                <li>{{ kwarg }}: {{ value }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <button
+                                    class="button"
+                                    onclick="removeJobFromQueue('{{ job_id }}')"
+                            >Remove</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div class="row">
+            <h2>Results</h2>
+        </div>
+        <div class="row">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Enqueue time</th>
+                        <th>Args</th>
+                        <th>Kwargs</th>
+                        <th>Result</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job_id, result in job_results.items() %}
+                    <tr>
+                        <td>{{ result.f }}</td>
+                        <td>{{ result.et }}</td>
+                        <td><ul>
+                            {% for arg in result.a %}
+                                <li>{{ arg }}</li>
+                            {% endfor %}
+                            </ul></td>
+                        <td>
+                            <ul>
+                            {% for kwarg, value in result.k.items() %}
+                                <li>{{ kwarg }}: {{ value }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{ result.r }}</td>
+                        <td>
+                            <button
+                                    class="button"
+                                    onclick="removeJobFromQueue('{{ job_id }}')"
+                            >Remove</button>
+                            <button
+                                    class="button button-outline"
+                                    onclick="retryJob('{{ job_id }}')"
+                            >Retry</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        async function apiRequest(method, url = '', data = {}) {
+            let options = {
+                method: method,
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'same-origin',
+            };
+            if (method !== 'GET') {
+                options['headers'] = {
+                    'Content-Type': 'application/json'
+                };
+                options['body'] = JSON.stringify(data);
+            }
+            const response = await fetch(url, options);
+            return await response.json();
+        }
+
+        function getJobs() {
+            apiRequest('GET', '/api/jobs')
+            .then((data) => {
+                window.data = data;
+            });
+        }
+        function removeJobFromQueue(jobId = '') {
+            apiRequest('DELETE', `/api/jobs/${jobId}`)
+            .then((data) => {
+                window.location.reload();
+            });
+        }
+        function retryJob(jobId = '') {
+            apiRequest('POST', '/api/jobs', data={job_key: jobId})
+            .then((data) => {
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
