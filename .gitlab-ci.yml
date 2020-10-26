@@ -27,14 +27,11 @@ stages:
   extends: .rnd_tags
   script:
     - *check-branch-behind-master
-    - docker pull $CI_REGISTRY_IMAGE/arq_dashboard:cache-latest || true
     - >
       docker build --cache-from $CI_REGISTRY_IMAGE/arq_dashboard:cache-latest
       -t $CI_REGISTRY_IMAGE/arq_dashboard:$CI_COMMIT_REF_SLUG
-      -t $CI_REGISTRY_IMAGE/arq_dashboard:cache-latest
       -f $BUILD_IMAGE.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/arq_dashboard:$CI_COMMIT_REF_SLUG
-    - docker push $CI_REGISTRY_IMAGE/arq_dashboard:cache-latest
 
 build_image:
   <<: *build_images
