@@ -40,3 +40,6 @@ All sources in one file: [arq_dashboard/templates/index.html](arq_dashboard/temp
 - Create pip package
 - Add tests
 - Separate dev packages and production build
+
+## Screenshot
+![Screenshot](https://files.ati.su/static/common_media/arq_dashboard_screenshot.png)
